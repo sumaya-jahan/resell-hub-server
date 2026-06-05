@@ -147,3 +147,50 @@ nav a{
     color: #6b7280;
     line-height: 1.6;
 }
+
+
+/*brain*/
+
+.second-brain {
+    width: 85%;
+    max-width: 1360px;
+    margin: 40px auto 80px;
+    display: flex;
+    align-items: center;
+    gap: 60px;
+}
+
+.brain-image,
+.brain-content {
+    flex: 1;
+}
+
+.brain-image img {
+    width: 100%;
+    display: block;
+}
+
+.solution {
+    color: #30B868;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.brain-content h2 {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.description {
+    color: #6b7280;
+    line-height: 1.6;
+    margin-bottom: 26px;
+}
+
+.brain-content ul {
+    list-style: none;
+}
+
+.brain-content li {
+    margin-bottom: 12px;
+}
