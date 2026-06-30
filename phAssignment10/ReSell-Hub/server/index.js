@@ -5,7 +5,11 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const {
+    MongoClient,
+    ServerApiVersion,
+    ObjectId,
+} = require("mongodb");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -15,9 +19,7 @@ app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
-// ==========================
-// Verify JWT Token
-// ==========================
+// Verify JWT
 const verifyToken = (req, res, next) => {
     const authHeader = req.headers.authorization;
 
@@ -70,7 +72,9 @@ async function run() {
             const token = jwt.sign(
                 user,
                 process.env.ACCESS_TOKEN_SECRET,
-                { expiresIn: "1h" }
+                {
+                    expiresIn: "1h",
+                }
             );
 
             res.send({ token });
@@ -92,14 +96,12 @@ async function run() {
             }
 
             const result = await usersCollection.insertOne(user);
-
             res.send(result);
         });
 
         // Get All Users
         app.get("/users", verifyToken, async (req, res) => {
             const result = await usersCollection.find().toArray();
-
             res.send(result);
         });
 
@@ -125,22 +127,57 @@ async function run() {
 
             res.send(result);
         });
-
         // Add Product
         app.post("/products", async (req, res) => {
-            const result = await productsCollection.insertOne(
-                req.body
-            );
-
+            const result = await productsCollection.insertOne(req.body);
             res.send(result);
         });
 
         // Get All Products
         app.get("/products", async (req, res) => {
             const result = await productsCollection.find().toArray();
+            res.send(result);
+        });
+
+        // Get Single Product
+        app.get("/products/:id", async (req, res) => {
+            const id = req.params.id;
+
+            const query = {
+                _id: new ObjectId(id),
+            };
+
+            const result = await productsCollection.findOne(query);
 
             res.send(result);
         });
+
+        // Get My Products
+        app.get("/my-products/:email", async (req, res) => {
+            const email = req.params.email;
+
+            const query = {
+                sellerEmail: email,
+            };
+
+            const result = await productsCollection.find(query).toArray();
+
+            res.send(result);
+        });
+
+        // Delete Product
+        app.delete("/products/:id", async (req, res) => {
+            const id = req.params.id;
+
+            const query = {
+                _id: new ObjectId(id),
+            };
+
+            const result = await productsCollection.deleteOne(query);
+
+            res.send(result);
+        });
+
         // Ping MongoDB
         await client.db("admin").command({ ping: 1 });
         console.log("✅ Connected to MongoDB!");
