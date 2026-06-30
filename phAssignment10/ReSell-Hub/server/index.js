@@ -2,6 +2,9 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
+
 const { MongoClient, ServerApiVersion } = require("mongodb");
 
 const app = express();
@@ -10,6 +13,7 @@ const port = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 
 // MongoDB URI
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.8eggrxa.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -30,7 +34,26 @@ async function run() {
         const database = client.db("resellHubDB");
         const usersCollection = database.collection("users");
 
+        // ==========================
+        // JWT API
+        // ==========================
+        app.post("/jwt", async (req, res) => {
+            const user = req.body;
+
+            const token = jwt.sign(
+                user,
+                process.env.ACCESS_TOKEN_SECRET,
+                {
+                    expiresIn: "1h",
+                }
+            );
+
+            res.send({ token });
+        });
+
+        // ==========================
         // Save User
+        // ==========================
         app.post("/users", async (req, res) => {
             const user = req.body;
 
@@ -49,13 +72,17 @@ async function run() {
             res.send(result);
         });
 
+        // ==========================
         // Get All Users
+        // ==========================
         app.get("/users", async (req, res) => {
             const result = await usersCollection.find().toArray();
             res.send(result);
         });
 
+        // ==========================
         // Update Last Login
+        // ==========================
         app.patch("/users", async (req, res) => {
             const { email } = req.body;
 
