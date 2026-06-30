@@ -64,6 +64,7 @@ async function run() {
 
         const usersCollection = database.collection("users");
         const productsCollection = database.collection("products");
+        const ordersCollection = database.collection("orders");
 
         // JWT
         app.post("/jwt", async (req, res) => {
