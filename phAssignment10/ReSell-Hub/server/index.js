@@ -62,7 +62,9 @@ async function run() {
         // await client.connect();
 
         const database = client.db("resellHubDB");
+
         const usersCollection = database.collection("users");
+        const productsCollection = database.collection("products");
 
         // ==========================
         // JWT API
@@ -141,6 +143,17 @@ async function run() {
                 filter,
                 updatedDoc
             );
+
+            res.send(result);
+        });
+
+        // ==========================
+        // Add Product
+        // ==========================
+        app.post("/products", async (req, res) => {
+            const product = req.body;
+
+            const result = await productsCollection.insertOne(product);
 
             res.send(result);
         });
