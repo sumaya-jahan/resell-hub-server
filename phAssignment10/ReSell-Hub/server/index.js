@@ -1,4 +1,3 @@
-
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
@@ -56,6 +55,26 @@ async function run() {
             res.send(result);
         });
 
+        // Update Last Login
+        app.patch("/users", async (req, res) => {
+            const { email } = req.body;
+
+            const filter = { email };
+
+            const updatedDoc = {
+                $set: {
+                    last_log_in: new Date(),
+                },
+            };
+
+            const result = await usersCollection.updateOne(
+                filter,
+                updatedDoc
+            );
+
+            res.send(result);
+        });
+
         // Ping MongoDB
         await client.db("admin").command({ ping: 1 });
         console.log("✅ Connected to MongoDB!");
@@ -75,4 +94,3 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
-
