@@ -178,6 +178,34 @@ async function run() {
             res.send(result);
         });
 
+        // Update Product
+        app.patch("/products/:id", async (req, res) => {
+            const id = req.params.id;
+            const updatedProduct = req.body;
+
+            const query = {
+                _id: new ObjectId(id),
+            };
+
+            const updatedDoc = {
+                $set: {
+                    title: updatedProduct.title,
+                    category: updatedProduct.category,
+                    condition: updatedProduct.condition,
+                    price: parseFloat(updatedProduct.price),
+                    image: updatedProduct.image,
+                    description: updatedProduct.description,
+                },
+            };
+
+            const result = await productsCollection.updateOne(
+                query,
+                updatedDoc
+            );
+
+            res.send(result);
+        });
+
         // Ping MongoDB
         await client.db("admin").command({ ping: 1 });
         console.log("✅ Connected to MongoDB!");
