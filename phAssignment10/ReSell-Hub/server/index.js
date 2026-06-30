@@ -207,6 +207,39 @@ async function run() {
             res.send(result);
         });
 
+        // Create Order
+        app.post("/orders", async (req, res) => {
+            const order = req.body;
+
+            const result = await ordersCollection.insertOne(order);
+
+            res.send(result);
+        });
+        // Get My Orders
+        app.get("/orders/:email", async (req, res) => {
+            const email = req.params.email;
+
+            const query = {
+                buyerEmail: email,
+            };
+
+            const result = await ordersCollection.find(query).toArray();
+
+            res.send(result);
+        });
+        // Cancel Order
+        app.delete("/orders/:id", async (req, res) => {
+            const id = req.params.id;
+
+            const query = {
+                _id: new ObjectId(id),
+            };
+
+            const result = await ordersCollection.deleteOne(query);
+
+            res.send(result);
+        });
+
         // Ping MongoDB
         await client.db("admin").command({ ping: 1 });
         console.log("✅ Connected to MongoDB!");
