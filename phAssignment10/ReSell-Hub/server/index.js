@@ -13,9 +13,9 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB URI
-const uri = `mongodb + srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.8eggrxa.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.8eggrxa.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
-// Create Mongo Client
+// Mongo Client
 const client = new MongoClient(uri, {
     serverApi: {
         version: ServerApiVersion.v1,
@@ -31,17 +31,42 @@ async function run() {
         const database = client.db("resellHubDB");
         const usersCollection = database.collection("users");
 
-        // Test MongoDB Connection
+        // Save User
+        app.post("/users", async (req, res) => {
+            const user = req.body;
+
+            const existingUser = await usersCollection.findOne({
+                email: user.email,
+            });
+
+            if (existingUser) {
+                return res.send({
+                    message: "User already exists",
+                    inserted: false,
+                });
+            }
+
+            const result = await usersCollection.insertOne(user);
+            res.send(result);
+        });
+
+        // Get All Users
+        app.get("/users", async (req, res) => {
+            const result = await usersCollection.find().toArray();
+            res.send(result);
+        });
+
+        // Ping MongoDB
         await client.db("admin").command({ ping: 1 });
         console.log("✅ Connected to MongoDB!");
-    } finally {
-        // await client.close();
+    } catch (error) {
+        console.log(error);
     }
 }
 
 run().catch(console.dir);
 
-// Default Route
+// Root Route
 app.get("/", (req, res) => {
     res.send("ReSell Hub Server is Running...");
 });
@@ -50,3 +75,4 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
+
