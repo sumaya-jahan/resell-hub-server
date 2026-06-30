@@ -15,6 +15,36 @@ app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
+// ==========================
+// Verify JWT Token
+// ==========================
+const verifyToken = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader) {
+        return res.status(401).send({
+            message: "Unauthorized Access",
+        });
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    jwt.verify(
+        token,
+        process.env.ACCESS_TOKEN_SECRET,
+        (err, decoded) => {
+            if (err) {
+                return res.status(401).send({
+                    message: "Unauthorized Access",
+                });
+            }
+
+            req.decoded = decoded;
+            next();
+        }
+    );
+};
+
 // MongoDB URI
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.8eggrxa.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
@@ -73,10 +103,23 @@ async function run() {
         });
 
         // ==========================
-        // Get All Users
+        // Get All Users (Protected)
         // ==========================
-        app.get("/users", async (req, res) => {
+        app.get("/users", verifyToken, async (req, res) => {
             const result = await usersCollection.find().toArray();
+            res.send(result);
+        });
+
+        // ==========================
+        // Get User by Email
+        // ==========================
+        app.get("/users/:email", async (req, res) => {
+            const email = req.params.email;
+
+            const query = { email };
+
+            const result = await usersCollection.findOne(query);
+
             res.send(result);
         });
 
